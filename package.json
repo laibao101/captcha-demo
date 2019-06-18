@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "express": "^4.17.1",
+    "express-session": "^1.16.2",
+    "nodemon": "^1.19.1",
+    "svg-captcha": "^1.4.0"
+  },
+  "scripts": {
+    "start": "nodemon -e js --exec node app"
+  }
+}
