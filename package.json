@@ -6,6 +6,7 @@
     "svg-captcha": "^1.4.0"
   },
   "scripts": {
-    "start": "nodemon -e js --exec node app"
+    "dev": "nodemon -e js --exec node app",
+    "start": "node app"
   }
 }
