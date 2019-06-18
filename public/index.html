@@ -5,12 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
+
+    <style>
+        #captcha-img {
+            width: 80px;
+            height: 30px;
+            visibility: hidden;
+        }
+    </style>
 </head>
 <body>
-    <form action="/checkCode" method="get">
+    <form id="form" >
         <input type="text" name="code"/>
-        <img src="/genCode" alt="验证码" onclick=""/>
+        <img id="captcha-img" alt="验证码" onclick="getCode()" />
         <button type="submit">提交</button>
     </form>
+
+    <script>
+        let token = '';
+        window.onload = () => {
+            getCode();
+
+            document.querySelector("#form").onsubmit = submit;
+        }
+
+        const getCode = () => {
+            fetch("/genCode")
+            .then(res => res.json())
+            .then((res) => {
+                const captchaImg = document.querySelector("#captcha-img")
+                captchaImg.src = res.imgUrl;
+                captchaImg.style.visibility = 'visible';
+                token = res.token;
+            });
+        }
+
+        const submit = (e) => {
+            e.preventDefault();
+            const code = document.forms[0].elements["code"].value;
+
+            fetch(`/checkCode?code=${code}&token=${token}`)
+            .then(res => res.json())
+            .then(res => {
+                alert(res.msg || '');
+            })
+        }
+    </script>
 </body>
 </html>

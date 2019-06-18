@@ -1,44 +1,54 @@
 const express = require("express");
-const fs = require("fs");
 const path = require("path");
-const session = require('express-session');
-const svgCaptcha = require('svg-captcha');
+const fs = require("fs");
+const captchapng = require('captchapng');
+const jwt = require("jsonwebtoken");
 
 const app = express();
+const privateKey = "laobao101";
 
-app.use(session({
-    secret: 'laibao101',
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false }
-}));
-
+app.use(express.static(__dirname + "/public"));
 app.get("/checkCode", (req, res) => {
     const { query } = req;
-    const { code = "0" } = query;
-    const { captcha } = req.session || {};
+    const { token, code } = query;
 
-    if (captcha && captcha.toLocaleLowerCase() === code.toLocaleLowerCase()) {
+    try {
+        const decoded = jwt.verify(token, privateKey);
+
+        if (decoded && decoded.iss === code) {
+            res.json({
+                code: 0,
+                msg: "验证通过"
+            });
+        }
         res.json({
-            msg: "验证通过"
+            code: 0,
+            msg: "验证失败"
         });
-        return;
+    } catch (err) {
+        res.json({
+            code: 1,
+            msg: err.message
+        });
     }
-
-    res.json({
-        msg: "验证失败"
-    });
 });
-
 
 app.get("/genCode", (req, res) => {
-    const captcha = svgCaptcha.create();
+    const code = (Math.random() * 1000000).toString().substr(0, 4);
+    const token = jwt.sign({ iss: code, }, privateKey);
+    const captcha = new captchapng(80, 30, code);
+    captcha.color(0, 0, 0, 0);
+    captcha.color(80, 80, 80, 255);
+    const img = captcha.getBase64();
+    const imgbase64 = Buffer.from(img, 'base64');
+    fs.writeFileSync(path.resolve(__dirname, "public/captcha.png"), imgbase64);
 
-    req.session.captcha = captcha.text;
-    res.type("svg");
-    res.send(captcha.data);
+    res.json({
+        code: 0,
+        token,
+        imgUrl: '/captcha.png'
+    });
 });
-
 
 app.get('/', (req, res) => {
     res.header('Access-Control-Allow-Origin', '*');
