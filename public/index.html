@@ -34,7 +34,12 @@
             .then(res => res.json())
             .then((res) => {
                 const captchaImg = document.querySelector("#captcha-img")
-                captchaImg.src = res.imgUrl;
+                let imgUrl = res.imgUrl;
+
+                // not base64
+                imgUrl = /.+\.(?:jpg|jpeg|png|gif)/i.test(imgUrl) ?
+                  `${imgUrl}?t=${Date.now()}` : imgUrl
+                captchaImg.src = imgUrl;
                 captchaImg.style.visibility = 'visible';
                 token = res.token;
             });
@@ -48,6 +53,7 @@
             .then(res => res.json())
             .then(res => {
                 alert(res.msg || '');
+                getCode();
             })
         }
     </script>

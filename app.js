@@ -20,6 +20,7 @@ app.get("/checkCode", (req, res) => {
                 code: 0,
                 msg: "验证通过"
             });
+            return;
         }
         res.json({
             code: 0,
